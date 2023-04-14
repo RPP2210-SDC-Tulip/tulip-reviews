@@ -1,0 +1,1 @@
+// Functions to take in the paths from index.js will go here once I read more about the reviews API
