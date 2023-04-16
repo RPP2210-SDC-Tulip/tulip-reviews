@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const reviewsSchema = new mongoose.Schema({
   review_id: { type: Number, required: true, unique: true },
