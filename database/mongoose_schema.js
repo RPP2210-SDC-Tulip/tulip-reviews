@@ -15,7 +15,7 @@ const reviewsSchema = new mongoose.Schema({
     id: { type: Number, required: true, unique: true },
     url: String
   }],
-  date: String,
+  date: String, // Big Int or Int (if letters, Date or timestamp) (if just numbers, use INT or BIGINT or NUM) // NOT STRING
   helpful: Number,
   reported: { type: Boolean, default: false },
   characteristics: {
@@ -30,9 +30,10 @@ const reviewsSchema = new mongoose.Schema({
 const Reviews = mongoose.model('Reviews', reviewsSchema);
 
 const reviewsMetaSchema = new mongoose.Schema({
-  product_id: { type: Number, required: true, unique: true },
+  // Look up Mongoose join, aggregation, document with $lookup command
+  product_id: { type: Number, required: true, unique: true }, // Will be defined by an ObjectId from the other table
   ratings: {
-    1: String,
+    1: String, // Change all of these to numbers
     2: String,
     3: String,
     4: String,
