@@ -2,13 +2,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
+const db = require('./controllers.js');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-  res.send('Hello World from Reviews Microservice!')
-});
+// app.get('/', (req, res) => {
+//   res.send('Hello World from Reviews Microservice!')
+// });
+
+app.get('/', db.getReviewsTest);
 
 // Returns a list of reviews for a particular product
   // Does not include any reported reviews
