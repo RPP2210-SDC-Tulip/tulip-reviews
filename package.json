@@ -4,6 +4,7 @@
   "description": "This is the microservice supporting the ratings and reviews for Atelier.",
   "main": "index.js",
   "scripts": {
+    "start": "node server/index.js",
     "test": "jest"
   },
   "repository": {
@@ -23,6 +24,7 @@
     "jest": "^29.5.0"
   },
   "dependencies": {
-    "mongoose": "^7.0.3"
+    "mongoose": "^7.0.3",
+    "pg": "^8.10.0"
   }
 }
