@@ -12,11 +12,25 @@ const pool = new Pool({
 });
 
 const getReviewsTest = (req, res) => {
-  pool.query('SELECT * FROM reviews_photos LIMIT 10', (err, data) => {
+  pool.query('SELECT * FROM reviews LIMIT 10', (err, data) => {
     if (err) {
       console.error(err);
     }
-    res.status(200).send(data.rows);
+    let formattedDataTest = data.rows.map(review => {
+      return ({
+        review_id: review.id,
+        rating: review.rating,
+        summary: review.summary,
+        recommend: review.recommend,
+        response: review.response,
+        body: review.body,
+        date: review.date,
+        reviewer_name: review.reviewer_name,
+        helpfulness: review.helpfulness
+      });
+    })
+    res.status(200).send(formattedDataTest);
+    // res.status(200).send(data.rows);
   })
 };
 
