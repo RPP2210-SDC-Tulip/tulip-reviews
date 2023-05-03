@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //   res.send('Hello World from Reviews Microservice!')
 // });
 
-app.get('/', db.getReviewsTest);
+// app.get('/', db.getReviewsTest);
 
 // Returns a list of reviews for a particular product
   // Does not include any reported reviews
@@ -21,8 +21,9 @@ app.get('/', db.getReviewsTest);
     // sort - TXT, changes sort order based on "newest", "helpful", or "relevant"
     // product_id - INT, specifies which product to retrieve reviews for
   // Response: 200
-app.get('/reviews/', (req, res) => {
-});
+// app.get('/reviews/', (req, res) => {
+// });
+app.get('/reviews/', db.getProductReviews);
 
 // Returns review metadata for a given product
   // Query parameters:
