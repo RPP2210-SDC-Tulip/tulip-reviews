@@ -15,8 +15,8 @@ const pool = new Pool({
 // For Leslie -- The current status of the first route I have in semi-working order.
 const getProductReviews = (req, res) => {
   console.log('PRODUCT ID: ', req.query.product_id);
-  // **TO-DO** HANDLE SORT
-  // **TO-DO** HANDLE DATE FORMATTING
+  // **TO-DO** HANDLE SORT (ORDER BY)
+  // **TO-DO** HANDLE DATE FORMATTING (Unix Epoch TO UTC, postgres date/time)
   // **TO-DO** DO NOT SEND REPORTED REVIEWS
   pool.query(`SELECT id AS review_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness,
     (SELECT COALESCE (JSON_AGG(temporary_photos), '[]') FROM (SELECT id, url FROM reviews_photos WHERE reviews_photos.review_id = reviews.id)
@@ -35,4 +35,17 @@ const getProductReviews = (req, res) => {
   })
 };
 
+const getReviewsMeta = (req, res) => {
+  console.log('META PRODUCT ID: ', req.query.product_id);
+  // Needs to:
+    // Get total ratings of each number from reviews table
+      // SELECT rating, COUNT (*) AS "ratings" FROM reviews WHERE product_id = 2 GROUP BY rating;
+    // Get total recommended from reviews table (shape appears to be 0: num)
+      // SELECT COUNT(*) FILTER (WHERE recommend) AS recommended FROM reviews WHERE product_id = 2;
+    // Send characteristics object, which is nested with characteristics_name, characteristic_id, and value
+      // In progress - generates an error:
+      // SELECT id, name, (SELECT value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id) AS "characteristics" FROM characteristics WHERE product_id = 3 GROUP BY name;
+}
+
 module.exports.getProductReviews = getProductReviews;
+module.exports.getReviewsMeta = getReviewsMeta;

@@ -23,14 +23,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
   // Response: 200
 // app.get('/reviews/', (req, res) => {
 // });
-app.get('/reviews/', db.getProductReviews);
+// For Leslie -- The current status of the first route I have in semi-working order. The rest are pseudocode for me to work on tomorrow.
+app.get('/reviews/', db.getProductReviews); // View of MVC
 
 // Returns review metadata for a given product
   // Query parameters:
     // product_id - INT, id of product for which data should be returned
   // Response: 200
-app.get('/reviews/meta', (req, res) => {
-});
+app.get('/reviews/meta', db.getReviewsMeta);
 
 // Adds a review for a given product
   // Body parameters:
