@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
-const db = require('./controllers.js');
+const controllers = require('./controllers.js');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,13 +24,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.get('/reviews/', (req, res) => {
 // });
 // For Leslie -- The current status of the first route I have in semi-working order. The rest are pseudocode for me to work on tomorrow.
-app.get('/reviews/', db.getProductReviews); // View of MVC
+app.get('/reviews/', controllers.getProductReviews); // View of MVC
 
 // Returns review metadata for a given product
   // Query parameters:
     // product_id - INT, id of product for which data should be returned
   // Response: 200
-app.get('/reviews/meta', db.getReviewsMeta);
+app.get('/reviews/meta', controllers.getReviewsMeta);
 
 // Adds a review for a given product
   // Body parameters:
@@ -65,3 +65,5 @@ app.put('/reviews/:review_id/helpful', (req, res) => {
 app.listen(port, () => {
   console.log(`Reviews microservice listening on port ${port}`)
 });
+
+module.exports = app;
