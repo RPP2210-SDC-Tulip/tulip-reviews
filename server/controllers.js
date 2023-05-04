@@ -12,6 +12,7 @@ const pool = new Pool({
   port: 5432
 });
 
+// For Leslie -- The current status of the first route I have in semi-working order.
 const getProductReviews = (req, res) => {
   console.log('PRODUCT ID: ', req.query.product_id);
   // **TO-DO** HANDLE SORT
