@@ -47,9 +47,57 @@ describe('GET /reviews', () => {
       });
     }).timeout(10000);
 
-    // Add test for date formatting
+    // **TO-DO**  Add test for date formatting
 
-    // Add test for sorting
+
+    // Add test for helpful sorting
+    it('Should sort reviews by helpfulness', (done) => {
+      request(app)
+        .get('/reviews')
+        .query({product_id: 999965, sort: 'helpful'})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.product).to.equal('999965');
+          expect(res.body.results[0].review_id).to.equal('5774690');
+          expect(res.body.results[0].helpfulness).to.equal(26);
+          expect(res.body.results[1].review_id).to.equal('5774687');
+          expect(res.body.results[1].helpfulness).to.equal(15);
+          expect(res.body.results[3].review_id).to.equal('5774689');
+          expect(res.body.results[3].helpfulness).to.equal(3);
+          done();
+        });
+      }).timeout(10000);
+
+    // Add test for newest sorting
+    it('Should sort reviews by newest', (done) => {
+      request(app)
+        .get('/reviews')
+        .query({product_id: 999965, sort: 'newest'})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.product).to.equal('999965');
+          expect(res.body.results[0].review_id).to.equal('5774690');
+          expect(res.body.results[0].date).to.equal('1605722348455'); // need to refactor later for expected date string format*
+          expect(res.body.results[1].review_id).to.equal('5774691');
+          expect(res.body.results[1].date).to.equal('1603455095097'); // need to refactor later for expected date string format*
+          expect(res.body.results[3].review_id).to.equal('5774687');
+          expect(res.body.results[3].date).to.equal('1589365485089'); // need to refactor later for expected date string format*
+          done();
+        });
+      }).timeout(10000);
+
+    // **TO-DO** Add test for relevant sorting
 
     // Add test for not sending reported reviews
+    it('Should not include data from the reviews table if a review was reported', (done) => {
+      request(app)
+        .get('/reviews')
+        .query({product_id: 999971})
+        .end((err, res) => {
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.product).to.equal('999971');
+          expect(res.body.results[2].review_id).to.equal('5774713'); // Note that id 5774712 is reported
+          done();
+        });
+      }).timeout(10000);
 });

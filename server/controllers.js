@@ -14,7 +14,7 @@ const pool = new Pool({
 
 // For Leslie -- The current status of the first route I have in semi-working order.
 const getProductReviews = (req, res) => {
-  console.log('PRODUCT ID: ', req.query.product_id);
+  // console.log('PRODUCT ID: ', req.query.product_id);
   // **TO-DO** HANDLE SORT (ORDER BY)
   // **TO-DO** HANDLE DATE FORMATTING (Unix Epoch TO UTC, postgres date/time)
   // **TO-DO** DO NOT SEND REPORTED REVIEWS
