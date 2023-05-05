@@ -46,6 +46,9 @@ app.get('/reviews/meta', controllers.getReviewsMeta);
   // Response: 201
 app.post('/reviews', (req, res) => {
 });
+// POSTS to reviews table
+// INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a test', 'testing is so much fun yay testing', true, false, 'me', 'me@gmail.com', 0);
+
 
 // Updates a review to show it was found helpful
   // Parameters:
@@ -65,3 +68,4 @@ app.listen(port, () => {
 });
 
 module.exports = app;
+

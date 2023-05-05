@@ -69,7 +69,7 @@ const addHelpful = (req, res) => {
     if (err) {
       console.error(err);
     }
-    res.sendStatus(204);
+    res.status(204).send('Helpfulness changed!');
   })
 };
 

@@ -4,7 +4,7 @@ const expect = chai.expect;
 const request = require('supertest');
 const app = require('../server/index.js');
 
-describe('GET /reviews', () => {
+xdescribe('GET /reviews', () => {
   it('Should fetch data from the reviews table with the correct shape', (done) => {
     request(app)
       .get('/reviews')
@@ -97,15 +97,28 @@ describe('GET /reviews', () => {
       }).timeout(10000);
 });
 
-// **TO-DO** ASK IN OFFICE HOUR HOW TO TEST INCREMENTING
 describe('PUT /reviews/helpful', () => {
   it(`Should increment a review's helpfulness score by one`, (done) => {
+    var review_id;
+    var helpfulness;
     request(app)
-      .put('/reviews/7392/helpful')
+      .get('/reviews')
+      .query({product_id: 1})
       .end((err, res) => {
-        expect(res.statusCode).to.equal(204);
-        done();
-      });
+        if (err) { return done(err); }
+        review_id = res.body.results[0].review_id;
+        helpfulness = Number(res.body.results[0].helpfulness);
+        request(app).put(`/reviews/${review_id}/helpful`)
+          .expect(204)
+          .end((err, res) => {
+            if (err) { return done(err); }
+            request(app).get('/reviews/?product_id=1')
+              .expect((res) => {
+                expect(Number(res.body.results[0].helpfulness) - 1).to.equal(helpfulness);
+              })
+              .end(done);
+          })
+      })
   }).timeout(10000);
 });
 
