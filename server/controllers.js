@@ -73,8 +73,19 @@ const addHelpful = (req, res) => {
   })
 };
 
+const markReported = (req, res) => {
+  // console.log('REQ: ', req.params.review_id);
+  pool.query(`UPDATE reviews SET reported = true WHERE id = ${req.params.review_id}`, (err, data) => {
+    if (err) {
+      console.error(err);
+    }
+    res.sendStatus(204);
+  })
+};
+
 
 
 module.exports.getProductReviews = getProductReviews;
 module.exports.getReviewsMeta = getReviewsMeta;
 module.exports.addHelpful = addHelpful;
+module.exports.markReported = markReported;

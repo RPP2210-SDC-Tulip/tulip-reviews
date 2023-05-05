@@ -58,8 +58,7 @@ app.put('/reviews/:review_id/helpful', controllers.addHelpful);
   // Parameters:
     // review_id - INT, required id of review to update
   // Response: 204 (no content)
-app.put('/reviews/:review_id/report', (req, res) => {
-});
+app.put('/reviews/:review_id/report', controllers.markReported);
 
 app.listen(port, () => {
   console.log(`Reviews microservice listening on port ${port}`)

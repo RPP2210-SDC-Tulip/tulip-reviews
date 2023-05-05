@@ -108,3 +108,16 @@ describe('PUT /reviews/helpful', () => {
       });
   }).timeout(10000);
 });
+
+describe('PUT /reviews/report', () => {
+  it(`Should mark a review as reported`, (done) => {
+    request(app)
+      .put('/reviews/5774614/report')
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(204);
+        done();
+      });
+  }).timeout(10000);
+
+  // **TO-DO** Add test for newly marked report should not be included in subsequent get requests
+});
