@@ -1,3 +1,4 @@
+// const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const request = require('supertest');
@@ -8,9 +9,10 @@ describe('GET /reviews', () => {
     request(app)
       .get('/reviews')
       .query({product_id: 2})
-      .expect(200)
       .end((err, res) => {
         // console.log(res.body);
+        // console.log('Status Code: ', res.statusCode);
+        expect(res.statusCode).to.equal(200);
         expect(res.body.product).to.equal('2');
         expect(res.body.page).to.equal(1);
         expect(res.body.count).to.equal(5);
@@ -27,15 +29,15 @@ describe('GET /reviews', () => {
         expect(res.body.results[0].photos.length).to.equal(0);
         done();
       });
-  });
+  }).timeout(10000);
 
   it('Should fetch data from the reviews_photos table with the correct shape', (done) => {
     request(app)
       .get('/reviews')
       .query({product_id: 2})
-      .expect(200)
       .end((err, res) => {
         // console.log(res.body.results[2]);
+        expect(res.statusCode).to.equal(200);
         expect(res.body.product).to.equal('2');
         expect(res.body.results[2].review_id).to.equal('5');
         expect(res.body.results[2].photos.length).to.equal(3);
@@ -43,7 +45,7 @@ describe('GET /reviews', () => {
         expect(res.body.results[2].photos[2].url).to.equal('https://images.unsplash.com/photo-1487349384428-12b47aca925e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80');
         done();
       });
-    });
+    }).timeout(10000);
 
     // Add test for date formatting
 

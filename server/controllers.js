@@ -43,9 +43,15 @@ const getReviewsMeta = (req, res) => {
     // Get total recommended from reviews table (shape appears to be 0: num)
       // SELECT COUNT(*) FILTER (WHERE recommend) AS recommended FROM reviews WHERE product_id = 2;
     // Send characteristics object, which is nested with characteristics_name, characteristic_id, and value
+      // Portion -- gets average value based on characteristic_id
+        // SELECT AVG (value) AS testing FROM characteristic_reviews WHERE characteristic_id = 5 GROUP BY characteristic_id;
+      // Portion -- creates an {}
+        // SELECT characteristic_id, json_object_agg(review_id, value) tests FROM characteristic_reviews GROUP BY characteristic_id LIMIT 10;
       // In progress - generates an error:
       // SELECT id, name, (SELECT value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id) AS "characteristics" FROM characteristics WHERE product_id = 3 GROUP BY name;
+      // SELECT name, (SELECT characteristic_id, value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id)
 }
+
 
 module.exports.getProductReviews = getProductReviews;
 module.exports.getReviewsMeta = getReviewsMeta;
