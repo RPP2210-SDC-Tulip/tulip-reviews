@@ -50,8 +50,31 @@ const getReviewsMeta = (req, res) => {
       // In progress - generates an error:
       // SELECT id, name, (SELECT value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id) AS "characteristics" FROM characteristics WHERE product_id = 3 GROUP BY name;
       // SELECT name, (SELECT characteristic_id, value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id)
-}
+
+    // Test
+    // SELECT characteristic_id, json_object_agg('value', (SELECT AVG (value) FROM characteristic_reviews)) testing FROM characteristic_reviews GROUP BY characteristic_id LIMIT 10;
+    // json_build_object('id', characteristic_id, 'value', (SELECT AVG (value) FROM characteristic_reviews))
+    // SELECT json_build_object('id', characteristic_id, 'value', (SELECT AVG (value) FROM characteristic_reviews GROUP BY characteristic_id)) testing FROM characteristic_reviews LIMIT 10;
+
+    // Another test
+    // SELECT id, (SELECT AVG (value) AS testing FROM characteristic_reviews) FROM characteristic_reviews WHERE ((SELECT id FROM reviews) = characteristic_reviews.review_id AND (SELECT product_id FROM reviews) = 2);
+
+  };
+
+const addHelpful = (req, res) => {
+  // console.log('REQ: ', req.params.review_id);
+  pool.query(`UPDATE reviews SET helpfulness =
+    ((SELECT helpfulness FROM reviews WHERE id = ${req.params.review_id}) + 1)
+    WHERE id = ${req.params.review_id};`, (err, data) => {
+    if (err) {
+      console.error(err);
+    }
+    res.sendStatus(204);
+  })
+};
+
 
 
 module.exports.getProductReviews = getProductReviews;
 module.exports.getReviewsMeta = getReviewsMeta;
+module.exports.addHelpful = addHelpful;

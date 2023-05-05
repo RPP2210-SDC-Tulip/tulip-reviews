@@ -11,7 +11,6 @@ describe('GET /reviews', () => {
       .query({product_id: 2})
       .end((err, res) => {
         // console.log(res.body);
-        // console.log('Status Code: ', res.statusCode);
         expect(res.statusCode).to.equal(200);
         expect(res.body.product).to.equal('2');
         expect(res.body.page).to.equal(1);
@@ -49,8 +48,6 @@ describe('GET /reviews', () => {
 
     // **TO-DO**  Add test for date formatting
 
-
-    // Add test for helpful sorting
     it('Should sort reviews by helpfulness', (done) => {
       request(app)
         .get('/reviews')
@@ -68,7 +65,6 @@ describe('GET /reviews', () => {
         });
       }).timeout(10000);
 
-    // Add test for newest sorting
     it('Should sort reviews by newest', (done) => {
       request(app)
         .get('/reviews')
@@ -88,7 +84,6 @@ describe('GET /reviews', () => {
 
     // **TO-DO** Add test for relevant sorting
 
-    // Add test for not sending reported reviews
     it('Should not include data from the reviews table if a review was reported', (done) => {
       request(app)
         .get('/reviews')
@@ -100,4 +95,16 @@ describe('GET /reviews', () => {
           done();
         });
       }).timeout(10000);
+});
+
+// **TO-DO** ASK IN OFFICE HOUR HOW TO TEST INCREMENTING
+describe('PUT /reviews/helpful', () => {
+  it(`Should increment a review's helpfulness score by one`, (done) => {
+    request(app)
+      .put('/reviews/7392/helpful')
+      .end((err, res) => {
+        expect(res.statusCode).to.equal(204);
+        done();
+      });
+  }).timeout(10000);
 });

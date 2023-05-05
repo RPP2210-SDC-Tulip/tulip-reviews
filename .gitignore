@@ -3,3 +3,4 @@ package-lock.json
 .env
 .csv
 reviews_source_data
+.nyc_output

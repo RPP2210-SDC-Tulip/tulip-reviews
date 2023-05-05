@@ -51,15 +51,14 @@ app.post('/reviews', (req, res) => {
   // Parameters:
     // review_id - INT, required id of review to update
   // Response: 204 (no content)
-app.put('/reviews/:review_id/helpful', (req, res) => {
-});
+app.put('/reviews/:review_id/helpful', controllers.addHelpful);
 
 // Updeates a review to show it was reported
   // Does not delete the review, just keeps it from being returned in GET request
   // Parameters:
     // review_id - INT, required id of review to update
   // Response: 204 (no content)
-app.put('/reviews/:review_id/helpful', (req, res) => {
+app.put('/reviews/:review_id/report', (req, res) => {
 });
 
 app.listen(port, () => {
