@@ -4,7 +4,7 @@ const expect = chai.expect;
 const request = require('supertest');
 const app = require('../server/index.js');
 
-xdescribe('GET /reviews', () => {
+describe('GET /reviews', () => {
   it('Should fetch data from the reviews table with the correct shape', (done) => {
     request(app)
       .get('/reviews')

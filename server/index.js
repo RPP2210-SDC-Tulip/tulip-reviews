@@ -48,7 +48,9 @@ app.post('/reviews', (req, res) => {
 });
 // POSTS to reviews table
 // INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a test', 'testing is so much fun yay testing', true, false, 'me', 'me@gmail.com', 0);
-
+// WITH new_review_id as ( RETURNING id) INSERT INTO reviews_photos(id, review_id, url) VALUES ((SELECT MAX(reviews_photos.id) FROM reviews_photos) + 1, review_id, 'testingtestingtesting')
+// Allows inserting photos as well: -- currently for single url...will need to refactor for the full array
+  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a test', 'testing is so much fun yay testing', true, false, 'me', 'me@gmail.com', 0) RETURNING id) INSERT INTO reviews_photos(id, review_id, url) VALUES ((SELECT MAX(reviews_photos.id) FROM reviews_photos) + 1, (SELECT id FROM new_id), 'testingtestingtesting');
 
 // Updates a review to show it was found helpful
   // Parameters:

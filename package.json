@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/index.js",
     "test": "mocha tests/*.js",
-    "coverage": "nyc --reporter=text mocha tests/*.js"
+    "coverage": "nyc --reporter=html --reporter=text mocha tests/*.js --exit"
   },
   "repository": {
     "type": "git",
