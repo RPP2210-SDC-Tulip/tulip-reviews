@@ -61,6 +61,32 @@ const getReviewsMeta = (req, res) => {
 
   };
 
+const addReview = (req, res) => {
+  // console.log('REQ: ', req.body);
+  var reqCharIds = [];
+  var reqCharValues = [];
+  for (var key in req.body.characteristics) {
+    reqCharIds.push(Number(key));
+    reqCharValues.push(Number(req.body.characteristics[key]));
+  };
+
+  var testQuery = `WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id), photos_ins AS (INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array[${req.body.photos}]) RETURNING id) INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`;
+
+  // pool.query(`WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) SELECT ((SELECT MAX(reviews.id) FROM reviews) + 1), ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), "${req.body.summary}", "${req.body.body}", ${req.body.recommend}, false, "${req.body.name}", "${req.body.email}", 0 RETURNING id), photos_ins AS (INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array[${req.body.photos}]) RETURNING id) INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`, (err, data) => {
+  pool.query(`WITH new_id as
+    (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness)
+    VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id),
+    photos_ins AS (INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array[${req.body.photos}]) RETURNING id)
+    INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`,
+    (err, data) => {
+    if (err) {
+      console.error(err);
+    } else {
+      res.status(201).send('Review successfully posted!');
+    }
+    })
+};
+
 const addHelpful = (req, res) => {
   // console.log('REQ: ', req.params.review_id);
   pool.query(`UPDATE reviews SET helpfulness =
@@ -87,5 +113,6 @@ const markReported = (req, res) => {
 
 module.exports.getProductReviews = getProductReviews;
 module.exports.getReviewsMeta = getReviewsMeta;
+module.exports.addReview = addReview;
 module.exports.addHelpful = addHelpful;
 module.exports.markReported = markReported;

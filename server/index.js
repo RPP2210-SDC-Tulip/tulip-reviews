@@ -42,15 +42,40 @@ app.get('/reviews/meta', controllers.getReviewsMeta);
     // name - username
     // email - email address
     // photos - [TEXT]
-    // characteristics - {"characteristic_id": review_value}
+    // characteristics - {"characteristic_id1": review_value, "characteristic_id2": review_value}
   // Response: 201
-app.post('/reviews', (req, res) => {
-});
+app.post('/reviews', controllers.addReview);
 // POSTS to reviews table
 // INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a test', 'testing is so much fun yay testing', true, false, 'me', 'me@gmail.com', 0);
 // WITH new_review_id as ( RETURNING id) INSERT INTO reviews_photos(id, review_id, url) VALUES ((SELECT MAX(reviews_photos.id) FROM reviews_photos) + 1, review_id, 'testingtestingtesting')
-// Allows inserting photos as well: -- currently for single url...will need to refactor for the full array
-  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a test', 'testing is so much fun yay testing', true, false, 'me', 'me@gmail.com', 0) RETURNING id) INSERT INTO reviews_photos(id, review_id, url) VALUES ((SELECT MAX(reviews_photos.id) FROM reviews_photos) + 1, (SELECT id FROM new_id), 'testingtestingtesting');
+// Allows inserting photos as well: -- now needs inserting into characteristics
+  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a newer test', 'testing is so much fun yay testing woohooooo', true, false, 'me777', 'me777@gmail.com', 0) RETURNING id) INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array['sampleurl34', 'sampleurl88']) INSERT INTO characteristic_reviews xyz;
+
+  // Working
+  // INSERT INTO characteristic_reviews(id, characteristic_id, review_id, value) SELECT 19327576, (SELECT js.key FROM json_each_text('{"5": 3}') AS js)::int, 5774956, (SELECT js.value FROM json_each_text('{"5": 3}') AS js)::int;
+
+
+  // Not working
+  // INSERT INTO characteristic_reviews(id, characteristic_id, review_id, value) SELECT 19327577, UNNEST(array[(SELECT js.key FROM json_each_text('{"5": 3, "9": 12}') AS js)::int]), 5774956, UNNEST(array[(SELECT js.value FROM json_each_text('{"5": 3, "9": 12}') AS js)::int]);
+
+  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a newer test', 'testing is so much fun yay testing woohooooo', true, false, 'me777', 'me777@gmail.com', 0) RETURNING id) INSERT INTO characteristic_reviews(id, characteristic_id, review_id) SELECT 19327577, UNNEST(array[SELECT array_agg FROM (SELECT ARRAY_AGG(testing) AS array_agg FROM (SELECT js.key FROM json_each_text('{"5": 3, "9": 12}') AS js) AS testing) AS char_ids]), (SELECT id FROM new_id);
+  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a newer test', 'testing is so much fun yay testing woohooooo', true, false, 'me777', 'me777@gmail.com', 0) RETURNING id) INSERT INTO characteristic_reviews(id, characteristic_id, review_id) SELECT 19327577, (SELECT UNNEST(array_agg) FROM (SELECT ARRAY_AGG(testing) AS array_agg FROM (SELECT js.key FROM json_each_text('{"5": 3, "9": 12}') AS js) AS testing) AS char_ids), (SELECT id FROM new_id);
+
+  // FOR TESTING ***
+  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 9, 3, (SELECT EXTRACT(epoch FROM now())), 'hello I am a newer test', 'testing is so much fun yay testing woohooooo', true, false, 'me777', 'me777@gmail.com', 0) RETURNING id) INSERT INTO characteristic_reviews(id, characteristic_id, review_id) SELECT 19327577, UNNEST(ARRAY_AGG((SELECT js.key::int FROM json_each_text('{"5": 3, "9": 12}') AS js))), (SELECT id FROM new_id);
+
+  // SELECT UNNEST(array_agg) FROM (SELECT ARRAY_AGG(testing) AS array_agg FROM (SELECT js.key FROM json_each_text('{"5": 3, "9": 12}') AS js) AS testing) AS char_ids;
+  // SELECT UNNEST(array_agg) FROM (SELECT ARRAY_AGG(testing) AS array_agg FROM (SELECT js.value FROM json_each_text('{"5": 3, "9": 12}') AS js) AS testing) AS rev_val;
+
+  // SELECT UNNEST(array_agg) FROM (SELECT ARRAY_AGG(testing) AS array_agg FROM ((SELECT js.key::int FROM json_each_text('{"5": 3, "9": 12}') AS js)) AS testing) AS char_ids;
+  // SELECT UNNEST(ARRAY_AGG(SELECT js.key::int FROM json_each_text('{"5": 3, "9": 12}') AS js));
+
+  // SELECT JSON_BUILD_OBJECT(5, 3, 9, 12)
+
+  // for (key in req.body.characteristics) {
+    // keys.push(key);
+    // values.push(value);
+  // }
 
 // Updates a review to show it was found helpful
   // Parameters:
