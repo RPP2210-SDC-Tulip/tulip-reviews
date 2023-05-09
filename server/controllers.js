@@ -40,8 +40,14 @@ const getReviewsMeta = (req, res) => {
   // Needs to:
     // Get total ratings of each number from reviews table
       // SELECT rating, COUNT (*) AS "ratings" FROM reviews WHERE product_id = 2 GROUP BY rating;
-    // Get total recommended from reviews table (shape appears to be 0: num)
-      // SELECT COUNT(*) FILTER (WHERE recommend) AS recommended FROM reviews WHERE product_id = 2;
+      // LONG BUT WORKING:
+      // SELECT JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = 2), 2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = 2), 3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = 2), 4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = 2), 5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = 2)) AS ratings;
+    // Get total recommended from reviews table ({false: 0, true: 27})
+      // SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = 2), 'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = 2)) AS recommended;
+
+    // MEGA QUERY FOR product_id, ratings, recommended -- NEEDS CHARACTERISTICS
+    // SELECT JSON_BUILD_OBJECT('product_id', 2, 'ratings', (JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = 2), 2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = 2), 3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = 2), 4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = 2), 5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = 2))), 'recommended', (SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = 2), 'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = 2))));
+
     // Send characteristics object, which is nested with characteristics_name, characteristic_id, and value
       // Portion -- gets average value based on characteristic_id
         // SELECT AVG (value) AS testing FROM characteristic_reviews WHERE characteristic_id = 5 GROUP BY characteristic_id;
@@ -70,9 +76,8 @@ const addReview = (req, res) => {
     reqCharValues.push(Number(req.body.characteristics[key]));
   };
 
-  var testQuery = `WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id), photos_ins AS (INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array[${req.body.photos}]) RETURNING id) INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`;
+  var testQuery = ``;
 
-  // pool.query(`WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) SELECT ((SELECT MAX(reviews.id) FROM reviews) + 1), ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), "${req.body.summary}", "${req.body.body}", ${req.body.recommend}, false, "${req.body.name}", "${req.body.email}", 0 RETURNING id), photos_ins AS (INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array[${req.body.photos}]) RETURNING id) INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`, (err, data) => {
   pool.query(`WITH new_id as
     (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness)
     VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id),
