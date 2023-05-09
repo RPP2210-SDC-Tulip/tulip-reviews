@@ -1,16 +1,4 @@
-// Functions to take in the paths from index.js will go here once I read more about the reviews API
-require('dotenv').config();
-// Can migrate all of the connections to the database index.js location (connecting to the db)
-const Pool = require('pg').Pool;
-const myUsername = process.env.MY_USERNAME;
-const myPassword = process.env.MY_PASSWORD;
-const pool = new Pool({
-  user: myUsername,
-  host: 'localhost',
-  database: 'reviews',
-  password: myPassword,
-  port: 5432
-});
+const pool = require('../database/index.js');
 
 const getProductReviews = (req, res) => {
   // console.log('PRODUCT ID: ', req.query.product_id);
@@ -115,8 +103,6 @@ const markReported = (req, res) => {
     }
   });
 };
-
-
 
 module.exports.getProductReviews = getProductReviews;
 module.exports.getReviewsMeta = getReviewsMeta;
