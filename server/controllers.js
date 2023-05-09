@@ -12,7 +12,6 @@ const pool = new Pool({
   port: 5432
 });
 
-// For Leslie -- The current status of the first route I have in semi-working order.
 const getProductReviews = (req, res) => {
   // console.log('PRODUCT ID: ', req.query.product_id);
   // **TO-DO** HANDLE SORT (ORDER BY)
@@ -33,11 +32,12 @@ const getProductReviews = (req, res) => {
       }
       res.status(200).send(result);
     }
-  })
+  });
 };
 
 const getReviewsMeta = (req, res) => {
   console.log('META PRODUCT ID: ', req.query.product_id);
+  // **TO-DO** Shorten ratings portion of query
   pool.query(`SELECT JSON_BUILD_OBJECT('product_id', ${req.query.product_id},
     'ratings', (JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = ${req.query.product_id}),
       2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = ${req.query.product_id}),
@@ -55,43 +55,18 @@ const getReviewsMeta = (req, res) => {
     } else {
       res.status(200).send(data.rows[0].json_build_object);
     }
-  })
+  });
   // Needs to:
     // Get total ratings of each number from reviews table
-      // SELECT rating, COUNT (*) AS "ratings" FROM reviews WHERE product_id = 2 GROUP BY rating;
       // LONG BUT WORKING:
       // SELECT JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = 2), 2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = 2), 3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = 2), 4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = 2), 5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = 2)) AS ratings;
     // Get total recommended from reviews table ({false: 0, true: 27})
+      // WORKING:
       // SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = 2), 'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = 2)) AS recommended;
-
-    // MEGA QUERY FOR product_id, ratings, recommended -- NEEDS CHARACTERISTICS
-    // SELECT JSON_BUILD_OBJECT('product_id', 2, 'ratings', (JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = 2), 2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = 2), 3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = 2), 4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = 2), 5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = 2))), 'recommended', (SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = 2), 'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = 2))));
-    // SELECT JSON_BUILD_OBJECT('product_id', 2, 'ratings', (JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = 2), 2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = 2), 3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = 2), 4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = 2), 5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = 2))), 'recommended', (SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = 2), 'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = 2))), 'characteristics', (SELECT JSON_OBJECT_AGG(name, char_detail.char_data) FROM (SELECT name, JSON_BUILD_OBJECT('id', char_avg.id, 'value', char_avg.value) AS char_data FROM (SELECT id, name, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id) AS value FROM characteristics WHERE product_id = 12 GROUP BY name, id) AS char_avg) AS char_detail));
-
-    // WORKING QUERY FOR CHARACTERISTICS ONLY
-    // SELECT JSON_BUILD_OBJECT('characteristics', (SELECT JSON_OBJECT_AGG(name, char_detail.char_data) FROM (SELECT name, JSON_BUILD_OBJECT('id', char_avg.id, 'value', char_avg.value) AS char_data FROM (SELECT id, name, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id) AS value FROM characteristics WHERE product_id = 12 GROUP BY name, id) AS char_avg) AS char_detail));
-
     // Send characteristics object, which is nested with characteristics_name, characteristic_id, and value
-      // Successfully creates for single charId
-      // SELECT name, JSON_OBJECT_AGG(id, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id)) FROM characteristics WHERE product_id = 12 GROUP BY name;
-
-      // Portion -- gets average value based on characteristic_id
-        // SELECT AVG (value) AS testing FROM characteristic_reviews WHERE characteristic_id = 5 GROUP BY characteristic_id;
-      // Portion -- creates an {}
-        // SELECT characteristic_id, json_object_agg(review_id, value) tests FROM characteristic_reviews GROUP BY characteristic_id LIMIT 10;
-      // In progress - generates an error:
-      // SELECT id, name, (SELECT value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id) AS "characteristics" FROM characteristics WHERE product_id = 3 GROUP BY name;
-      // SELECT name, (SELECT characteristic_id, value FROM characteristic_reviews WHERE characteristic_reviews.characteristic_id = characteristics.id)
-
-    // Test
-    // SELECT characteristic_id, json_object_agg('value', (SELECT AVG (value) FROM characteristic_reviews)) testing FROM characteristic_reviews GROUP BY characteristic_id LIMIT 10;
-    // json_build_object('id', characteristic_id, 'value', (SELECT AVG (value) FROM characteristic_reviews))
-    // SELECT json_build_object('id', characteristic_id, 'value', (SELECT AVG (value) FROM characteristic_reviews GROUP BY characteristic_id)) testing FROM characteristic_reviews LIMIT 10;
-
-    // Another test
-    // SELECT id, (SELECT AVG (value) AS testing FROM characteristic_reviews) FROM characteristic_reviews WHERE ((SELECT id FROM reviews) = characteristic_reviews.review_id AND (SELECT product_id FROM reviews) = 2);
-
-  };
+      // WORKING:
+      // SELECT JSON_BUILD_OBJECT('characteristics', (SELECT JSON_OBJECT_AGG(name, char_detail.char_data) FROM (SELECT name, JSON_BUILD_OBJECT('id', char_avg.id, 'value', char_avg.value) AS char_data FROM (SELECT id, name, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id) AS value FROM characteristics WHERE product_id = 12 GROUP BY name, id) AS char_avg) AS char_detail));
+};
 
 const addReview = (req, res) => {
   // console.log('REQ: ', req.body);
@@ -102,8 +77,7 @@ const addReview = (req, res) => {
     reqCharValues.push(Number(req.body.characteristics[key]));
   };
 
-  var testQuery = ``;
-
+  // **TO-DO** Refactor query to work for special characters in text input data (ex. summary, body)
   pool.query(`WITH new_id as
     (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness)
     VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id),
@@ -115,7 +89,7 @@ const addReview = (req, res) => {
     } else {
       res.status(201).send('Review successfully posted!');
     }
-    })
+  });
 };
 
 const addHelpful = (req, res) => {
@@ -125,9 +99,10 @@ const addHelpful = (req, res) => {
     WHERE id = ${req.params.review_id};`, (err, data) => {
     if (err) {
       console.error(err);
+    } else {
+      res.status(204).send('Helpfulness changed!');
     }
-    res.status(204).send('Helpfulness changed!');
-  })
+  });
 };
 
 const markReported = (req, res) => {
@@ -135,9 +110,10 @@ const markReported = (req, res) => {
   pool.query(`UPDATE reviews SET reported = true WHERE id = ${req.params.review_id}`, (err, data) => {
     if (err) {
       console.error(err);
+    } else {
+      res.sendStatus(204);
     }
-    res.sendStatus(204);
-  })
+  });
 };
 
 
