@@ -5,7 +5,7 @@ const getProductReviews = (req, res) => {
   // **TO-DO** HANDLE SORT (ORDER BY)
   // **TO-DO** HANDLE DATE FORMATTING (Unix Epoch TO UTC, postgres date/time)
   // **TO-DO** DO NOT SEND REPORTED REVIEWS
-  pool.query(`SELECT id AS review_id, rating, summary, recommend, response, body, date, reviewer_name, helpfulness,
+  pool.query(`SELECT id AS review_id, rating, summary, recommend, response, body, (SELECT TO_TIMESTAMP(date/1000) AS date), reviewer_name, helpfulness,
     (SELECT COALESCE (JSON_AGG(temporary_photos), '[]') FROM (SELECT id, url FROM reviews_photos WHERE reviews_photos.review_id = reviews.id)
     AS temporary_photos) AS photos
     FROM reviews WHERE product_id = ${req.query.product_id} LIMIT 5;`, (err, data) => {
