@@ -3,11 +3,10 @@ const pool = require('../database/index.js');
 const getProductReviews = (req, res) => {
   // console.log('PRODUCT ID: ', req.query.product_id);
   // **TO-DO** HANDLE SORT (ORDER BY)
-  // **TO-DO** DO NOT SEND REPORTED REVIEWS
   pool.query(`SELECT id AS review_id, rating, summary, recommend, response, body, (SELECT TO_TIMESTAMP(date/1000) AS date), reviewer_name, helpfulness,
     (SELECT COALESCE (JSON_AGG(temporary_photos), '[]') FROM (SELECT id, url FROM reviews_photos WHERE reviews_photos.review_id = reviews.id)
     AS temporary_photos) AS photos
-    FROM reviews WHERE product_id = ${req.query.product_id};`, (err, data) => {
+    FROM reviews WHERE product_id = ${req.query.product_id} AND reported = false;`, (err, data) => {
     if (err) {
       console.error(err);
     } else {
