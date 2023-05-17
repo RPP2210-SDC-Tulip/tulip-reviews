@@ -3,12 +3,11 @@ const pool = require('../database/index.js');
 const getProductReviews = (req, res) => {
   // console.log('PRODUCT ID: ', req.query.product_id);
   // **TO-DO** HANDLE SORT (ORDER BY)
-  // **TO-DO** HANDLE DATE FORMATTING (Unix Epoch TO UTC, postgres date/time)
   // **TO-DO** DO NOT SEND REPORTED REVIEWS
   pool.query(`SELECT id AS review_id, rating, summary, recommend, response, body, (SELECT TO_TIMESTAMP(date/1000) AS date), reviewer_name, helpfulness,
     (SELECT COALESCE (JSON_AGG(temporary_photos), '[]') FROM (SELECT id, url FROM reviews_photos WHERE reviews_photos.review_id = reviews.id)
     AS temporary_photos) AS photos
-    FROM reviews WHERE product_id = ${req.query.product_id} LIMIT 5;`, (err, data) => {
+    FROM reviews WHERE product_id = ${req.query.product_id};`, (err, data) => {
     if (err) {
       console.error(err);
     } else {
@@ -24,16 +23,14 @@ const getProductReviews = (req, res) => {
 };
 
 const getReviewsMeta = (req, res) => {
-  console.log('META PRODUCT ID: ', req.query.product_id);
-  // **TO-DO** Shorten ratings portion of query
+  // console.log('META PRODUCT ID: ', req.query.product_id);
   pool.query(`SELECT JSON_BUILD_OBJECT('product_id', ${req.query.product_id},
-    'ratings', (JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = ${req.query.product_id}),
-      2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = ${req.query.product_id}),
-      3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = ${req.query.product_id}),
-      4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = ${req.query.product_id}),
-      5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = ${req.query.product_id}))),
-    'recommended', (SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = ${req.query.product_id}),
-      'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = ${req.query.product_id}))),
+    'ratings', (SELECT JSON_OBJECT_AGG(rating, count)
+      FROM (SELECT rating, COUNT(*) FROM reviews WHERE product_id = ${req.query.product_id}
+      GROUP BY rating ORDER BY rating ASC) as ratings),
+    'recommended', (SELECT JSON_OBJECT_AGG(recommend, count)
+      FROM (SELECT recommend, COUNT(*) FROM reviews WHERE product_id = ${req.query.product_id}
+      GROUP BY recommend) AS recommended),
     'characteristics', (SELECT JSON_OBJECT_AGG(name, char_detail.char_data)
       FROM (SELECT name, JSON_BUILD_OBJECT('id', char_avg.id, 'value', char_avg.value) AS char_data
       FROM (SELECT id, name, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id) AS value
@@ -44,16 +41,6 @@ const getReviewsMeta = (req, res) => {
       res.status(200).send(data.rows[0].json_build_object);
     }
   });
-  // Needs to:
-    // Get total ratings of each number from reviews table
-      // LONG BUT WORKING:
-      // SELECT JSON_BUILD_OBJECT(1, (SELECT COUNT(*) FILTER (WHERE rating = 1) FROM reviews WHERE product_id = 2), 2, (SELECT COUNT(*) FILTER (WHERE rating = 2) FROM reviews WHERE product_id = 2), 3, (SELECT COUNT(*) FILTER (WHERE rating = 3) FROM reviews WHERE product_id = 2), 4, (SELECT COUNT(*) FILTER (WHERE rating = 4) FROM reviews WHERE product_id = 2), 5, (SELECT COUNT(*) FILTER (WHERE rating = 5) FROM reviews WHERE product_id = 2)) AS ratings;
-    // Get total recommended from reviews table ({false: 0, true: 27})
-      // WORKING:
-      // SELECT JSON_BUILD_OBJECT('false', (SELECT COUNT(*) FILTER (WHERE NOT recommend) FROM reviews WHERE product_id = 2), 'true', (SELECT COUNT(*) FILTER (WHERE recommend) FROM reviews WHERE product_id = 2)) AS recommended;
-    // Send characteristics object, which is nested with characteristics_name, characteristic_id, and value
-      // WORKING:
-      // SELECT JSON_BUILD_OBJECT('characteristics', (SELECT JSON_OBJECT_AGG(name, char_detail.char_data) FROM (SELECT name, JSON_BUILD_OBJECT('id', char_avg.id, 'value', char_avg.value) AS char_data FROM (SELECT id, name, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id) AS value FROM characteristics WHERE product_id = 12 GROUP BY name, id) AS char_avg) AS char_detail));
 };
 
 const addReview = (req, res) => {
