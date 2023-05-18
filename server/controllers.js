@@ -74,7 +74,10 @@ const addReview = (req, res) => {
         if (err) {
           console.error(err);
         } else {
-          if (req.body.photos.length > 0) {
+          console.log('req.body.photos: ', req.body.photos);
+          if (req.body.photos.length === 0 || req.body.photos === "[]") {
+            res.status(201).send('Review without photos successfully posted!');
+          } else {
             pool.query(`INSERT INTO reviews_photos(review_id, url) SELECT ${reviewId}, UNNEST(array[${req.body.photos}]);`, (err, data) => {
               if (err) {
                 console.error(err);
@@ -82,8 +85,6 @@ const addReview = (req, res) => {
                 res.status(201).send('Review with photos successfully posted!');
               }
             })
-          } else {
-            res.status(201).send('Review without photos successfully posted!');
           }
         }
       })
