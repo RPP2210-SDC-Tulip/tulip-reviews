@@ -9,7 +9,7 @@ const myPort = process.env.MY_PORT;
 
 const pool = new Pool({
   user: myUsername,
-  host: myHost, // Public IPv4 address
+  host: myHost,
   database: myDatabase,
   password: myPassword,
   port: myPort
