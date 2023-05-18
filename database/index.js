@@ -1,17 +1,26 @@
-// Notes from OH w/ Leslie:
-// File that connects to the database, sets up schemas
-// Will likely need to use this to create schema/db for deployment to ec2 (SQL file)
-
 require('dotenv').config();
 const Pool = require('pg').Pool;
+
 const myUsername = process.env.MY_USERNAME;
 const myPassword = process.env.MY_PASSWORD;
+const myHost = process.env.MY_HOST;
+const myDatabase = process.env.MY_DB;
+const myPort = process.env.MY_PORT;
+
 const pool = new Pool({
   user: myUsername,
-  host: 'localhost',
-  database: 'reviews',
+  host: myHost, // Public IPv4 address
+  database: myDatabase,
   password: myPassword,
-  port: 5432
+  port: myPort
 });
+
+pool.connect((err) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log('Database connected!');
+  }
+})
 
 module.exports = pool;
