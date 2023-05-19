@@ -1,9 +1,9 @@
 require('dotenv').config();
 const Pool = require('pg').Pool;
 
-const myUsername = process.env.MY_LOCAL_USERNAME;
-const myPassword = process.env.MY_LOCAL_PASSWORD;
-const myHost = process.env.MY_LOCAL_HOST;
+const myUsername = process.env.MY_USERNAME;
+const myPassword = process.env.MY_PASSWORD;
+const myHost = process.env.MY_HOST;
 const myDatabase = process.env.MY_DB;
 const myPort = process.env.MY_PORT;
 
