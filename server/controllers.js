@@ -57,37 +57,25 @@ const addReview = (req, res) => {
     reqCharValues.push(Number(req.body.characteristics[key]));
   };
 
-  console.log('Photos Length: ', req.body.photos.length);
+  var query = ``;
+  if (req.body.photos.length === 0 || req.body.photos === "[]") {
+    query = `WITH new_id as
+    (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness)
+    VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id)
+    INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`;
+  } else {
+    query = `WITH new_id as
+    (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness)
+    VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id),
+    photos_ins AS (INSERT INTO reviews_photos(review_id, url) SELECT (SELECT id FROM new_id), UNNEST(array[${req.body.photos}]) RETURNING id)
+    INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), (SELECT id FROM new_id), UNNEST(array[${reqCharValues}]);`;
+  }
 
-  // WITH new_id as (INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness) VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, 989533, 4, (SELECT EXTRACT(epoch FROM now())), 'test', 'testing', false, false, 'tester', 'tester@testing.com', 0) RETURNING id), INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[1, 2, 3]), (SELECT id FROM new_id), UNNEST(array[4, 5, 6]);,
-
-  var addQuery = `INSERT INTO reviews (id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, helpfulness)
-  VALUES ((SELECT MAX(reviews.id) FROM reviews) + 1, ${req.body.product_id}, ${req.body.rating}, (SELECT EXTRACT(epoch FROM now())), '${req.body.summary}', '${req.body.body}', ${req.body.recommend}, false, '${req.body.name}', '${req.body.email}', 0) RETURNING id;`;
-
-  // **TO-DO** Refactor query to work for special characters in text input data (ex. summary, body)
-  pool.query(addQuery, (err, data) => {
+  pool.query(query, (err, data) => {
     if (err) {
       console.error(err);
     } else {
-      var reviewId = data.rows[0].id;
-      pool.query(`INSERT INTO characteristic_reviews (characteristic_id, review_id, value) SELECT UNNEST(array[${reqCharIds}]), ${reviewId}, UNNEST(array[${reqCharValues}]);`, (err, data) => {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log('req.body.photos: ', req.body.photos);
-          if (req.body.photos.length === 0 || req.body.photos === "[]") {
-            res.status(201).send('Review without photos successfully posted!');
-          } else {
-            pool.query(`INSERT INTO reviews_photos(review_id, url) SELECT ${reviewId}, UNNEST(array[${req.body.photos}]);`, (err, data) => {
-              if (err) {
-                console.error(err);
-              } else {
-                res.status(201).send('Review with photos successfully posted!');
-              }
-            })
-          }
-        }
-      })
+      res.status(201).send('Review successfully posted!');
     }
   });
 };
