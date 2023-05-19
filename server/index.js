@@ -3,9 +3,16 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3003;
 const controllers = require('./controllers.js');
+require('dotenv').config();
+
+const myLoaderToken = process.env.MY_LOADER_TOKEN;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get(`/${myLoaderToken}/`, (req, res) => {
+  res.send(myLoaderToken);
+})
 
 // Returns a list of reviews for a particular product
   // Does not include any reported reviews
