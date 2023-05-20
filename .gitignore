@@ -5,3 +5,4 @@ package-lock.json
 reviews_source_data
 .nyc_output
 coverage
+newrelic_agent.log
