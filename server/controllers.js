@@ -1,7 +1,6 @@
 const pool = require('../database/index.js');
 
 const getProductReviews = (req, res) => {
-  // console.log('PRODUCT ID: ', req.query.product_id);
   var order = "helpfulness DESC"
   if (req.query.sort === "newest") {
     order = "date DESC"
@@ -28,7 +27,6 @@ const getProductReviews = (req, res) => {
 };
 
 const getReviewsMeta = (req, res) => {
-  // console.log('META PRODUCT ID: ', req.query.product_id);
   pool.query(`SELECT JSON_BUILD_OBJECT('product_id', ${req.query.product_id},
     'ratings', (SELECT JSON_OBJECT_AGG(rating, count)
       FROM (SELECT rating, COUNT(*) FROM reviews WHERE product_id = ${req.query.product_id}
@@ -49,7 +47,6 @@ const getReviewsMeta = (req, res) => {
 };
 
 const addReview = (req, res) => {
-  // console.log('REQ: ', req.body);
   var reqCharIds = [];
   var reqCharValues = [];
   for (var key in req.body.characteristics) {
@@ -81,7 +78,6 @@ const addReview = (req, res) => {
 };
 
 const addHelpful = (req, res) => {
-  // console.log('REQ: ', req.params.review_id);
   pool.query(`UPDATE reviews SET helpfulness =
     ((SELECT helpfulness FROM reviews WHERE id = ${req.params.review_id}) + 1)
     WHERE id = ${req.params.review_id};`, (err, data) => {
@@ -94,18 +90,19 @@ const addHelpful = (req, res) => {
 };
 
 const markReported = (req, res) => {
-  // console.log('REQ: ', req.params.review_id);
   pool.query(`UPDATE reviews SET reported = true WHERE id = ${req.params.review_id}`, (err, data) => {
     if (err) {
       console.error(err);
     } else {
-      res.sendStatus(204).send('Marked reported!');
+      res.status(204).send('Marked reported!');
     }
   });
 };
 
-module.exports.getProductReviews = getProductReviews;
-module.exports.getReviewsMeta = getReviewsMeta;
-module.exports.addReview = addReview;
-module.exports.addHelpful = addHelpful;
-module.exports.markReported = markReported;
+module.exports = {
+  getProductReviews,
+  getReviewsMeta,
+  addReview,
+  addHelpful,
+  markReported
+};
