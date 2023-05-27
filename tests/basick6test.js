@@ -29,11 +29,4 @@ export default function () {
   const checkRes = check(res, {
     'Status is 200' : (r) => r.status === 200,
   });
-
-  // group('Get reviews for product id', () => {
-  //   let res = http.get(`http://localhost:3003/reviews/?product_id=${productId}`);
-  //   const checkRes = check(res, {
-  //     'Status is 200' : (r) => r.status === 200,
-  //   });
-  // });
-}
+};
