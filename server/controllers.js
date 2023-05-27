@@ -13,7 +13,7 @@ const getProductReviews = (req, res) => {
     AS temporary_photos) AS photos
     FROM reviews WHERE product_id = ${req.query.product_id} AND reported = false ORDER BY ${order};`, (err, data) => {
     if (err) {
-      console.error(err);
+      res.status(404).send(err);
     } else {
       let result = {
         product: req.query.product_id,
@@ -39,7 +39,7 @@ const getReviewsMeta = (req, res) => {
       FROM (SELECT id, name, (SELECT AVG (value) FROM characteristic_reviews WHERE characteristic_id = characteristics.id) AS value
       FROM characteristics WHERE product_id = ${req.query.product_id} GROUP BY name, id) AS char_avg) AS char_detail));`, (err, data) => {
     if (err) {
-      console.error(err);
+      res.status(404).send(err);
     } else {
       res.status(200).send(data.rows[0].json_build_object);
     }
@@ -70,7 +70,7 @@ const addReview = (req, res) => {
 
   pool.query(query, (err, data) => {
     if (err) {
-      console.error(err);
+      res.status(500).send(err);
     } else {
       res.status(201).send('Review successfully posted!');
     }
@@ -82,7 +82,7 @@ const addHelpful = (req, res) => {
     ((SELECT helpfulness FROM reviews WHERE id = ${req.params.review_id}) + 1)
     WHERE id = ${req.params.review_id};`, (err, data) => {
     if (err) {
-      console.error(err);
+      res.status(500).send(err);
     } else {
       res.status(204).send('Helpfulness changed!');
     }
@@ -92,7 +92,7 @@ const addHelpful = (req, res) => {
 const markReported = (req, res) => {
   pool.query(`UPDATE reviews SET reported = true WHERE id = ${req.params.review_id}`, (err, data) => {
     if (err) {
-      console.error(err);
+      res.status(500).send(err);
     } else {
       res.status(204).send('Marked reported!');
     }
