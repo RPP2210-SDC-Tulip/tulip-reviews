@@ -1,7 +1,7 @@
 # Reviews Microservice System Design for Atelier
 
 ## Overview:
-This project replaced the legacy API for a ecommerce website with a more efficient backend system.
+This project replaced the legacy API for an e-commerce website with a more efficient backend system.
 
 ## Tech Stack:
 ![Javascript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=323330)
@@ -24,11 +24,11 @@ This project replaced the legacy API for a ecommerce website with a more efficie
 - [License](#License)
 
 ## Description:
-This backend system architecture for a preexisting ecommerce web-portal focused on supporting the full dataset for the existing frontend architecture and performing at a rate of at least 1000 client requests per second under a 1% error rate in production.
+This backend system architecture for a preexisting e-commerce web-portal focused on supporting the full dataset for the existing front-end architecture and performing at a rate of at least 1,000 client requests per second under a 1% error rate in production.
 
 This project included completing an ETL process for the client-provided dataset, building efficint API routes to communicate with a PostgreSQL database, and implementing data-driven performance optimizations including load balancing and caching.
 
-In a production environment consisting of 5 AWS EC2 t2.micro instances (1 PostgreSQL database, 1 NGINX load balancer, 3 Node.js servers), this backend service exceeds the bare minimum client expectations, as it is able to handle over 5000 client requests per second under a 1% error rate in production.
+In a production environment consisting of 5 AWS EC2 t2.micro instances (1 PostgreSQL database, 1 NGINX load balancer, 3 Node.js servers), this backend service exceeds the bare minimum client expectations, as it is able to handle over **6,000rps** with **<1% error rate** in production.
 
 System peak performance **_before_** optimizations:
 
